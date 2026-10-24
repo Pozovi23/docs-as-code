@@ -1,0 +1,161 @@
+openapi: 3.0.3
+
+info:
+  title: Spam Detection API
+  description: API для автоматической проверки входящих писем на спам с помощью ML-модели.
+  version: 1.0.0
+
+servers:
+  - url: https://example.com/api/v1
+
+paths:
+  /emails/check:
+    post:
+      summary: Отправить письмо на проверку
+      description: Принимает текст письма и данные отправителя, возвращает результат классификации.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailInput'
+      responses:
+        '200':
+          description: Проверка выполнена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationResult'
+        '400':
+          description: Некорректный запрос (например, передан пустой текст)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Сервис классификации временно недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервиса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /emails/{emailId}/result:
+    get:
+      summary: Получить результат проверки письма
+      description: Возвращает сохранённый результат классификации для конкретного письма по его ID.
+      parameters:
+        - name: emailId
+          in: path
+          required: true
+          description: Уникальный идентификатор письма
+          schema:
+            type: integer
+            example: 101
+      responses:
+        '200':
+          description: Результат успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationResult'
+        '404':
+          description: Письмо с таким ID не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /models:
+    get:
+      summary: Получить информацию о текущей ML-модели
+      description: Возвращает версию модели, дату последнего обновления и её статус.
+      responses:
+        '200':
+          description: Информация успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelInfo'
+        '503':
+          description: Сервис временно недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    EmailInput:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: Текст (тело) письма, которое нужно проверить
+          example: "Уважаемый клиент, вы выиграли миллион! Перейдите по ссылке..."
+        sender:
+          type: string
+          description: Email адрес отправителя (опционально)
+          example: "spam@example.com"
+
+    ClassificationResult:
+      type: object
+      properties:
+        emailId:
+          type: integer
+          description: ID письма (возвращается только при запросе по ID)
+          example: 101
+        label:
+          type: string
+          enum: [spam, not_spam]
+          description: Результат классификации
+          example: "spam"
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Уверенность модели (от 0 до 1)
+          example: 0.95
+        checkedAt:
+          type: string
+          format: date-time
+          description: Время проверки письма
+          example: "2023-10-25T14:30:00Z"
+
+    ModelInfo:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Версия модели
+          example: "v1.2.0"
+        lastUpdated:
+          type: string
+          format: date
+          description: Дата последнего обновления
+          example: "2023-10-01"
+        status:
+          type: string
+          enum: [active, training, deprecated]
+          description: Текущий статус модели
+          example: "active"
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Машиночитаемый код ошибки
+          example: "INVALID_TEXT"
+        message:
+          type: string
+          description: Описание ошибки для разработчика
+          example: "Поле text не может быть пустым"
