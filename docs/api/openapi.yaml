@@ -20,8 +20,14 @@ paths:
             schema:
               $ref: '#/components/schemas/EmailInput'
       responses:
-        '200':
-          description: Проверка выполнена успешно
+        '201':
+          description: Письмо создано и проверено успешно
+          headers:
+            Location:
+              description: Ссылка на результат проверки
+              schema:
+                type: string
+                example: /api/v1/emails/101/result
           content:
             application/json:
               schema:
@@ -99,18 +105,24 @@ components:
         text:
           type: string
           description: Текст (тело) письма, которое нужно проверить
+          minLength: 1
           example: "Уважаемый клиент, вы выиграли миллион! Перейдите по ссылке..."
         sender:
           type: string
           description: Email адрес отправителя (опционально)
+          format: email
           example: "spam@example.com"
 
     ClassificationResult:
       type: object
+      required:
+        - emailId
+        - label
+        - confidence
       properties:
         emailId:
           type: integer
-          description: ID письма (возвращается только при запросе по ID)
+          description: Уникальный идентификатор письма
           example: 101
         label:
           type: string
@@ -132,6 +144,9 @@ components:
 
     ModelInfo:
       type: object
+      required:
+        - version
+        - status
       properties:
         version:
           type: string
@@ -150,6 +165,9 @@ components:
 
     ErrorResponse:
       type: object
+      required:
+        - code
+        - message
       properties:
         code:
           type: string
