@@ -45,9 +45,15 @@
 
 Этот датасет использовался как один из основных источников при обучении выбранной мной модели `roberta-spam`.
 
+По информации из репозитория авторов, помимо SMS Spam Collection, модель также обучалась на датасетах Enron Spam и Telegram Spam Ham.
+
 ## Источники
 
-- Страница датасета на Kaggle:  
+- Страница датасета SMS Spam Collection на Kaggle:  
   https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset
 - Оригинальная страница датасета:  
   https://archive.ics.uci.edu/ml/datasets/SMS+Spam+Collection
+- Страница датасета Enron Spam на Hugging Face: 
+  https://huggingface.co/datasets/SetFit/enron_spam/tree/main
+- Страница датасета Telegram Spam Ham на Hugging Face: 
+  https://huggingface.co/datasets/thehamkercat/telegram-spam-ham/tree/main
